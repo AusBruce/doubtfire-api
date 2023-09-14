@@ -3,7 +3,7 @@
 require 'test_helper'
 require 'grape'
 
-RSpec.describe SaveTestAPI, type: :request do
+describe SaveTestAPI do
   include TestHelpers::AuthHelper
   include TestHelpers::TestFileHelper
 
@@ -22,8 +22,8 @@ RSpec.describe SaveTestAPI, type: :request do
 
     it "returns all test results" do
       get base_url, headers: authenticated_header
-      expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)["data"].size).to eq(5)
+      assert_response :success
+      assert_equal 5, JSON.parse(response.body)["data"].size
     end
   end
 
@@ -31,7 +31,7 @@ RSpec.describe SaveTestAPI, type: :request do
   describe "GET /savetests/latest" do
     it "returns the latest test or creates a new one" do
       get "#{base_url}/latest", headers: authenticated_header
-      expect(response).to have_http_status(:ok)
+      assert_response :success
     end
   end
 
@@ -42,14 +42,14 @@ RSpec.describe SaveTestAPI, type: :request do
 
       it "returns the latest completed test" do
         get "#{base_url}/completed-latest", headers: authenticated_header
-        expect(response).to have_http_status(:ok)
+        assert_response :success
       end
     end
 
     context "when there are no completed tests" do
       it "returns an error" do
         get "#{base_url}/completed-latest", headers: authenticated_header
-        expect(response).to have_http_status(:not_found)
+        assert_response :not_found
       end
     end
   end
@@ -58,8 +58,8 @@ RSpec.describe SaveTestAPI, type: :request do
   describe "GET /savetests/:id" do
     it "returns the specified test result" do
       get "#{base_url}/#{test_attempt.id}", headers: authenticated_header
-      expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)["data"]["id"]).to eq(test_attempt.id)
+      assert_response :success
+      assert_equal test_attempt.id, JSON.parse(response.body)["data"]["id"]
     end
   end
 
@@ -76,10 +76,10 @@ RSpec.describe SaveTestAPI, type: :request do
     end
 
     it "creates a new test result" do
-      expect do
+      assert_difference 'TestAttempt.count', 1 do
         post base_url, params: valid_params, headers: authenticated_header
-      end.to change(TestAttempt, :count).by(1)
-      expect(response).to have_http_status(:created)
+      end
+      assert_response :created
     end
   end
 
@@ -89,8 +89,8 @@ RSpec.describe SaveTestAPI, type: :request do
 
     it "updates a test result" do
       put "#{base_url}/#{test_attempt.id}", params: valid_update_params, headers: authenticated_header
-      expect(response).to have_http_status(:ok)
-      expect(test_attempt.reload.name).to eq("Updated Test Name")
+      assert_response :success
+      assert_equal "Updated Test Name", test_attempt.reload.name
     end
   end
 
@@ -98,8 +98,8 @@ RSpec.describe SaveTestAPI, type: :request do
   describe "DELETE /savetests/:id" do
     it "deletes a test result" do
       delete "#{base_url}/#{test_attempt.id}", headers: authenticated_header
-      expect(response).to have_http_status(:ok)
-      expect { test_attempt.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      assert_response :success
+      assert_raises(ActiveRecord::RecordNotFound) { test_attempt.reload }
     end
   end
 
@@ -109,8 +109,8 @@ RSpec.describe SaveTestAPI, type: :request do
 
     it "updates exam data for a test result" do
       put "#{base_url}/#{test_attempt.id}/exam_data", params: valid_exam_data, headers: authenticated_header
-      expect(response).to have_http_status(:ok)
-      expect(JSON.parse(test_attempt.reload.exam_data)).to eq(valid_exam_data[:exam_data])
+      assert_response :success
+      assert_equal valid_exam_data[:exam_data], test_attempt.reload.exam_data
     end
   end
 end
