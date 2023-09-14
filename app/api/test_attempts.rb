@@ -1,6 +1,6 @@
 require 'grape'
 
-class SaveTestAPI < Grape::API
+class SaveTestApi < Grape::API
   format :json
 
   # Assigning AuthenticationHelpers
