@@ -9,7 +9,7 @@ describe TestAttemptsApi do
 
   # Constants
   let(:base_url) { "/savetests" }
-  let(:test_attempt) { FactoryBot.create(:test_attempt) }
+  let(:xtest_attempt) { FactoryBot.create(:xtest_attempt) }
 
   # Authentication header helper
   def authenticated_header
@@ -18,7 +18,7 @@ describe TestAttemptsApi do
 
   # Test Suite for GET /savetests
   describe "GET /savetests" do
-    before { FactoryBot.create_list(:test_attempt, 5) }
+    before { FactoryBot.create_list(:xtest_attempt, 5) }
 
     it "returns all test results" do
       get base_url, headers: authenticated_header
@@ -38,7 +38,7 @@ describe TestAttemptsApi do
   # Test Suite for GET /savetests/completed-latest
   describe "GET /savetests/completed-latest" do
     context "when there are completed tests" do
-      before { FactoryBot.create(:test_attempt, completed: true) }
+      before { FactoryBot.create(:xtest_attempt, completed: true) }
 
       it "returns the latest completed test" do
         get "#{base_url}/completed-latest", headers: authenticated_header
@@ -57,9 +57,9 @@ describe TestAttemptsApi do
   # Test Suite for GET /savetests/:id
   describe "GET /savetests/:id" do
     it "returns the specified test result" do
-      get "#{base_url}/#{test_attempt.id}", headers: authenticated_header
+      get "#{base_url}/#{xtest_attempt.id}", headers: authenticated_header
       assert_response :success
-      assert_equal test_attempt.id, JSON.parse(response.body)["data"]["id"]
+      assert_equal xtest_attempt.id, JSON.parse(response.body)["data"]["id"]
     end
   end
 
@@ -88,18 +88,18 @@ describe TestAttemptsApi do
     let(:valid_update_params) { { name: "Updated Test Name" } }
 
     it "updates a test result" do
-      put "#{base_url}/#{test_attempt.id}", params: valid_update_params, headers: authenticated_header
+      put "#{base_url}/#{xtest_attempt.id}", params: valid_update_params, headers: authenticated_header
       assert_response :success
-      assert_equal "Updated Test Name", test_attempt.reload.name
+      assert_equal "Updated Test Name", xtest_attempt.reload.name
     end
   end
 
   # Test Suite for DELETE /savetests/:id
   describe "DELETE /savetests/:id" do
     it "deletes a test result" do
-      delete "#{base_url}/#{test_attempt.id}", headers: authenticated_header
+      delete "#{base_url}/#{xtest_attempt.id}", headers: authenticated_header
       assert_response :success
-      assert_raises(ActiveRecord::RecordNotFound) { test_attempt.reload }
+      assert_raises(ActiveRecord::RecordNotFound) { xtest_attempt.reload }
     end
   end
 
@@ -108,9 +108,9 @@ describe TestAttemptsApi do
     let(:valid_exam_data) { { exam_data: { question1: "answer", question2: "answer2" }.to_json } }
 
     it "updates exam data for a test result" do
-      put "#{base_url}/#{test_attempt.id}/exam_data", params: valid_exam_data, headers: authenticated_header
+      put "#{base_url}/#{xtest_attempt.id}/exam_data", params: valid_exam_data, headers: authenticated_header
       assert_response :success
-      assert_equal valid_exam_data[:exam_data], test_attempt.reload.exam_data
+      assert_equal valid_exam_data[:exam_data], xtest_attempt.reload.exam_data
     end
   end
 end
