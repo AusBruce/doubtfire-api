@@ -77,7 +77,7 @@ class ApiRoot < Grape::API
   mount Tii::TiiActionApi
 
   mount NumbasApi
-  mount SaveTestApi
+  mount TestAttemptsApi
   mount CampusesPublicApi
   mount CampusesAuthenticatedApi
   mount TutorialsApi
@@ -126,7 +126,7 @@ class ApiRoot < Grape::API
   AuthenticationHelpers.add_auth_to WebcalApi
 
   AuthenticationHelpers.add_auth_to NumbasApi
-  AuthenticationHelpers.add_auth_to SaveTestApi
+  AuthenticationHelpers.add_auth_to TestAttemptsApi
 
   add_swagger_documentation \
     base_path: nil,

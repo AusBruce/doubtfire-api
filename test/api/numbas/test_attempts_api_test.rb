@@ -3,7 +3,7 @@
 require 'test_helper'
 require 'grape'
 
-describe SaveTestApi do
+describe TestAttemptApi do
   include TestHelpers::AuthHelper
   include TestHelpers::TestFileHelper
 

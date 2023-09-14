@@ -1,5 +1,5 @@
 module Entities
-  class SaveTest < Grape::Entity
+  class TestAttempt < Grape::Entity
     expose :id
     expose :name
     expose :attempt_number
