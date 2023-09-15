@@ -6,6 +6,7 @@ class NumbasApiTest < ActiveSupport::TestCase
   include Rack::Test::Methods
   include TestHelpers::AuthHelper
   include TestHelpers::TestFileHelper
+  include TestHelpers::AccountHelper
   include TestHelpers::JsonHelper
 
   def app
@@ -15,10 +16,11 @@ class NumbasApiTest < ActiveSupport::TestCase
   setup do
     @unit_code = "CSC101"
     @task_definition_id = 1
-    @zip_file_path = FileHelper.get_numbas_test_path(@unit_code, @task_definition_id, 'numbas_test.zip')
 
     @unit = FactoryBot.create(:unit, code: @unit_code)
     @task_definition = FactoryBot.create(:task_definition, unit: @unit, id: @task_definition_id)
+
+    @zip_file_path = FileHelper.get_numbas_test_path(@unit_code, @task_definition_id, 'numbas_test.zip')
   end
 
   def test_authentication
@@ -27,7 +29,7 @@ class NumbasApiTest < ActiveSupport::TestCase
   end
 
   def test_index_route
-    add_auth_header_for_some_authenticated_user
+    add_auth_header_for(user: first_student_user)
     get "/numbas_api/index.html", { unit_code: @unit_code, task_definition_id: @task_definition_id }
 
     assert_equal 200, last_response.status
@@ -35,7 +37,7 @@ class NumbasApiTest < ActiveSupport::TestCase
   end
 
   def test_file_route
-    add_auth_header_for_some_authenticated_user
+    add_auth_header_for(user: first_student_user)
     test_file = "sample.txt"
 
     get "/numbas_api/#{test_file}", { unit_code: @unit_code, task_definition_id: @task_definition_id, format: 'txt' }
@@ -44,7 +46,7 @@ class NumbasApiTest < ActiveSupport::TestCase
   end
 
   def test_file_not_found_in_zip
-    add_auth_header_for_some_authenticated_user
+    add_auth_header_for(user: first_student_user)
     test_file = "non_existent_file"
 
     get "/numbas_api/#{test_file}", { unit_code: @unit_code, task_definition_id: @task_definition_id, format: 'txt' }
@@ -53,7 +55,7 @@ class NumbasApiTest < ActiveSupport::TestCase
   end
 
   def test_upload_numbas_test
-    add_auth_header_for_some_authenticated_user
+    add_auth_header_for(user: first_student_user)
     tempfile = Tempfile.new('test')
     tempfile.write("sample data")
     tempfile.rewind
@@ -64,7 +66,7 @@ class NumbasApiTest < ActiveSupport::TestCase
   end
 
   def test_upload_numbas_test_without_file
-    add_auth_header_for_some_authenticated_user
+    add_auth_header_for(user: first_student_user)
 
     post "/numbas_api/uploadNumbasTest", { unit_code: @unit_code, task_definition_id: @task_definition_id }
     assert_equal 400, last_response.status
@@ -73,7 +75,7 @@ class NumbasApiTest < ActiveSupport::TestCase
 
   teardown do
     # Cleanup created files and database records
-    FileUtils.rm_f(@zip_file_path)
+    FileUtils.rm_f(@zip_file_path) if File.exist?(@zip_file_path)
     @task_definition.destroy!
     @unit.destroy!
   end

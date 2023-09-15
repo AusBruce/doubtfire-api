@@ -12,9 +12,12 @@ class TestAttemptsApiTest < ActiveSupport::TestCase
     @xtest_attempt = FactoryBot.create(:xtest_attempt)
   end
 
-  # Authentication header helper
-  def authenticated_header
-    { "Authorization" => "YourAuthToken" }
+  # Modify this method to use the AuthHelper
+  def authenticated_header(user = User.first)
+    {
+      "username" => user.username,
+      "auth_token" => auth_token(user)
+    }
   end
 
   def test_get_all_test_results
